@@ -162,6 +162,78 @@ class Backup {
                 <head>
                     <link rel="stylesheet" href="../../messages.css">
                 </head>
+                <style>
+                    body {
+                        background-color: #1f1f1f;
+                        margin-left: 20%;
+                        margin-right: 20%;
+                    }
+                    
+                    .message {
+                        font-family: Calibri;
+                        border-radius: 5px;
+                        margin-top: 5px;
+                        color: #FFFFFF;
+                        width: fit-content;
+                    }
+                    
+                    .message.message-right {
+                        background-color: #323348;
+                        margin-right: 0px;
+                        padding: 10px;
+                        padding-left: 20px;
+                        margin-left: auto;
+                    
+                        text-align: right;
+                    }
+                    
+                    .message.message-left {
+                        background-color: #292929;
+                        margin-left: 0px;
+                        padding: 10px;
+                        padding-right: 20px;
+                        margin-right: auto;
+                    }
+                    
+                    .message-timestamp {
+                        color: #c8c8c8;
+                        font-size: 10px;
+                        /*text-align: left;*/
+                        padding-top: 5px;
+                        padding-bottom: 5px;
+                        font-weight: lighter;
+                    }
+                    
+                    .message-sender {
+                        color: #c8c8c8;
+                        font-weight: bolder;
+                        font-size: 18px;
+                    }
+                    
+                    a {
+                        color: #7B83EB;
+                        text-decoration: none;
+                    }
+                    
+                    a:hover {
+                        text-decoration: underline;
+                    }
+                    
+                    p {
+                        margin: 0px;
+                    }
+                    
+                    .message-body {
+                        margin-top: 5px;
+                        margin-bottom: 3px;
+                    }
+                    
+                    img {
+                      max-width:720px !important;
+                      height:auto !important;
+                    }
+                    
+                </style>
             <body>
         `);
 
