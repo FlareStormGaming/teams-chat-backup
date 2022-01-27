@@ -172,47 +172,46 @@ class Backup {
             const data = await fsAPI.readFile(path.resolve(this.target, page), 'utf8');
             const messages = JSON.parse(data);
 
-            let prev = messages[0];
-            let next = messages[1];
+            let prev;
+            let next;
+            let startIdx = null;
 
             // loop over in reverse order:
             for (let messageIdx = messages.length - 1; messageIdx >= 0; messageIdx--) {
-
-                try { next = messages[messageIdx + 1] }
-                catch (err) { next = messages[messageIdx] }
 
                 const message = messages[messageIdx];
 
                 // message sent by a user
                 if (message.from) {
+                    if (!startIdx){ startIdx = messageIdx; prev = message } // defining start id, if not defined yet
+                    if (messageIdx !== startIdx - 1) {
+                        next = messages[startIdx - 1] // attempting to get the next message and set it to next
+                    } else {
+                        next = messages[startIdx]  // if next is the last message, leave it alone
+                    }
+                    if (!prev.from) { prev = messages[startIdx] }
+
                     if (message.from.user != null) {
-                        console.log(`Found message from user ${message.from.user}`)
-                        switch ([message.from.user, message.from.user]) {
-                            case ([prev.from.user, next.from.user]):
-                                // body block, previous & next message is sent by the same user
-                                await fsAPI.write(fd, `<div class="message ${message.from.user.id === myId ? 'message-right' : 'message-left'} body"> `)
-                                break;
-                            case ([prev.from.user, message.from.user]):
-                                // end block, matches previous user but not next user (if matches both, already caught by above)
-                                await fsAPI.write(fd, `<div class="message ${message.from.user.id === myId? 'message-right' : 'message-left'} end"`)
-                                break;
-                            case ([message.from.user, next.from.user]):
-                                // start block, matches next user but not previous (if matches both, already caught by first case)
+                        console.log(`Found message from user ${message.from.user.displayName}`)
+                        console.log(`    Previous: ${prev}, Next: ${next}, startIdx: ${startIdx}`)
+                        console.log(`    prev msg: ${prev.from}, next msg: ${next}`)
+                        if (prev) {
+                            if (message.from.user === prev.from.user) {
+                                if (message.from.user === next.from.user) {
+                                    // body block
+                                    await fsAPI.write(fd, `<div class="message ${message.from.user.id === myId ? 'message-right' : 'message-left'} body"> `)
+                                } else {
+                                    // end block
+                                    await fsAPI.write(fd, `<div class="message ${message.from.user.id === myId? 'message-right' : 'message-left'} end"`)
+                                }
+                            } else {
+                                // start block
                                 await fsAPI.write(fd,
                                     `<div class="message ${message.from.user.id === myId ? 'message-right' : 'message-left'} start">
                                     <div class="message-timestamp">${message.lastModifiedDateTime || message.createdDateTime}</div>
                                     <div class="message-sender">${message.from.user.displayName}</div>`
                                 );
-                                break;
-                            default:
-                                await fsAPI.write(fd,
-                                    `
-                                    <div class="message ${message.from.user.id === myId ? 'message-right' : 'message-left'}">
-                                    <div class="message-timestamp">${message.lastModifiedDateTime || message.createdDateTime}</div>
-                                    <div class="message-sender">${message.from.user.displayName}</div>
-                                    `
-                                    );
-
+                            }
                         }
 
                         if (message.body.contentType === 'html') {
@@ -233,10 +232,9 @@ class Backup {
                     } else {
                         console.error('couldn\'t determine message sender');
                     }
-
-                // message sent by a bot
+                    prev = message
                 }
-                prev = message
+
             }
         }
 
