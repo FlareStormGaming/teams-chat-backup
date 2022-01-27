@@ -264,9 +264,6 @@ class Backup {
                     if (!prev.from) { prev = messages[startIdx] }
 
                     if (message.from.user != null) {
-                        console.log(`Found message from user ${message.from.user.displayName}`)
-                        console.log(`    Previous: ${prev}, Next: ${next}, startIdx: ${startIdx}`)
-                        console.log(`    prev msg: ${prev.from}, next msg: ${next}`)
                         if (prev) {
                             if (message.from.user === prev.from.user) {
                                 if (message.from.user === next.from.user) {
@@ -317,6 +314,7 @@ class Backup {
         `);
 
         await fsAPI.close(fd);
+        console.log("File Creation Complete.")
     }
 }
 
