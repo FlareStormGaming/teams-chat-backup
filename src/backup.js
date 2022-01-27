@@ -186,6 +186,7 @@ class Backup {
                 // message sent by a user
                 if (message.from) {
                     if (message.from.user != null) {
+                        console.log(`Found message from user ${message.from.user}`)
                         switch ([message.from.user, message.from.user]) {
                             case ([prev.from.user, next.from.user]):
                                 // body block, previous & next message is sent by the same user
@@ -213,26 +214,27 @@ class Backup {
                                     );
 
                         }
-                    }
-                if (message.body.contentType === 'html') {
-                    await fsAPI.write(fd, `<div class="message-body">${replaceImages(message.body.content, imageIndex)}</div>
-                        </div>`
-                    );
-                } else {
-                    await fsAPI.write(fd, `<div class="message-body">${escapeHtml(message.body.content)}</div>
-                        </div>`
-                    );
-                }
 
-                // message sent by a bot
-                } else if (message.from.application != null) {
-                    await fsAPI.write(fd, `<div class="message message-left">
+                        if (message.body.contentType === 'html') {
+                            await fsAPI.write(fd, `<div class="message-body">${replaceImages(message.body.content, imageIndex)}</div>
+                                </div>`
+                            );
+                        } else {
+                            await fsAPI.write(fd, `<div class="message-body">${escapeHtml(message.body.content)}</div>
+                                </div>`
+                            );
+                        }
+                    } else if (message.from.application != null) {
+                        await fsAPI.write(fd, `<div class="message message-left">
                         <div class="message-timestamp">${message.lastModifiedDateTime || message.createdDateTime}</div>
                         <div class="message-sender">${message.from.application.displayName}</div>
                         </div>`
-                    );
-                } else {
-                    console.error('couldn\'t determine message sender');
+                        );
+                    } else {
+                        console.error('couldn\'t determine message sender');
+                    }
+
+                // message sent by a bot
                 }
                 prev = message
             }
