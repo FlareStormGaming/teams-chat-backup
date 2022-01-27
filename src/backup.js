@@ -173,16 +173,33 @@ class Backup {
 
       // loop over in reverse order:
       for (let messageIdx = messages.length - 1; messageIdx >= 0; messageIdx--) {
+        let prev = messages[0]
+        try { let next = messages[messageIdx + 1] }
+        catch (error) { let next = messages[messageIdx] }
+
         const message = messages[messageIdx];
 
         // message sent by a user
         if (message.from) {
           if (message.from.user != null) {
-            await fsAPI.write(fd, `<div class="message ${message.from.user.id === myId ? 'message-right' : 'message-left'}">
-  <div class="message-timestamp">${message.lastModifiedDateTime || message.createdDateTime}</div>
-  <div class="message-sender">${message.from.user.displayName}</div>
-`);
-
+            switch ([message.from.user, message.from.user]) {
+                case ([prev.from.user, next.from.user]) {
+                    // body block, previous & next message is sent by the same user
+                    await fsAPI.write(fd, `<div class="message ${message.from.user.id === myId ? 'message-right' : 'message-left'} body"> `)
+                    break;
+                } case ([prev.from.user, message.from.user]) {
+                    // end block, matches previous user but not next user (if matches both, already caught by above)
+                    await fsAPI.write(fd, `<div class="message ${message.from.user.id === myId? 'message-right' : 'message-left'} end"`)
+                    break;
+                } case ([message.from.user, next.from.user]) {
+                    // start block, matches next user but not previous (if matches both, already caught by first case)
+                    await fsAPI.write(fd,
+                        `<div class="message ${message.from.user.id === myId ? 'message-right' : 'message-left'} start">
+                        <div class="message-timestamp">${message.lastModifiedDateTime || message.createdDateTime}</div>
+                        <div class="message-sender">${message.from.user.displayName}</div>`
+                    );
+                }
+            }
             if (message.body.contentType === 'html') {
               await fsAPI.write(fd, `<div class="message-body">${replaceImages(message.body.content, imageIndex)}</div>
 </div>`);
@@ -201,6 +218,7 @@ class Backup {
           }
         }
       }
+      prev = message
     }
 
     // write foot
